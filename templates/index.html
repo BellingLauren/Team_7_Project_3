@@ -3,43 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flight Search</title>
+    <title>Chatbot</title>
+    
+    <!-- Add Bootstrap CSS CDN -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
 </head>
 <body>
-    <h1>Search for Flights</h1>
-    <form id="flightForm">
-        <label>Origin:</label>
-        <input type="text" id="origin" required>
-        <label>Destination:</label>
-        <input type="text" id="destination" required>
-        <label>Date:</label>
-        <input type="date" id="date" required>
-        <button type="submit">Search Flights</button>
-    </form>
-
-    <h2>Flight Results</h2>
-    <ul id="results"></ul>
+    <div class="container">
+        <h1 class="text-center mt-4">Flight Search Chatbot</h1>
+        
+        <!-- Chatbox UI -->
+        <div id="chatbox" class="border p-4 mb-4" style="height: 300px; overflow-y: scroll;"></div>
+        
+        <!-- Input area -->
+        <div class="form-group">
+            <input id="user-input" type="text" class="form-control" placeholder="Ask a question..." />
+        </div>
+        <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+    </div>
+    
+    <!-- Add Bootstrap JS CDN -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        document.getElementById("flightForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            let origin = document.getElementById("origin").value;
-            let destination = document.getElementById("destination").value;
-            let date = document.getElementById("date").value;
+        function sendMessage() {
+            let userMessage = document.getElementById("user-input").value.toLowerCase();
+            let chatbox = document.getElementById("chatbox");
 
-            fetch(`/search-flights?origin=${origin}&destination=${destination}&date=${date}`)
-                .then(response => response.json())
-                .then(data => {
-                    let results = document.getElementById("results");
-                    results.innerHTML = "";
-                    data.forEach(flight => {
-                        let item = document.createElement("li");
-                        item.textContent = `Flight: ${flight.itineraries[0].segments[0].carrierCode} - Price: ${flight.price.total}`;
-                        results.appendChild(item);
-                    });
-                })
-                .catch(error => console.error("Error fetching flights:", error));
-        });
+            let userDiv = document.createElement("div");
+            userDiv.textContent = "You: " + userMessage;
+            chatbox.appendChild(userDiv);
+
+            if (userMessage.includes("find flight")) {
+                window.location.href = "/flights?origin=JFK&destination=LHR&departure_date=2025-04-10";
+            } else {
+                let botDiv = document.createElement("div");
+                botDiv.textContent = "Bot: I can help you find flights! Type 'find flight'!";
+                chatbox.appendChild(botDiv);
+            }
+
+            document.getElementById("user-input").value = ""; // Clear input
+        }
     </script>
 </body>
-</html>
