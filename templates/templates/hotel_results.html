@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Results - Vacation Travel</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f4f4f9;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+        }
+
+        .hotel-card {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .hotel-card h5 {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .hotel-card p {
+            color: #777;
+        }
+
+        .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container mt-5">
+        <h2>Hotel Results</h2>
+        <div class="row">
+            {% if hotels %}
+                {% for hotel in hotels %}
+                    <div class="col-md-4">
+                        <div class="hotel-card">
+                            <h5>{{ hotel['name'] }}</h5>
+                            <p><strong>Rating:</strong> {{ hotel['rating'] if hotel['rating'] else 'No rating available' }}</p>
+                            <p><strong>Address:</strong> {{ hotel['address']['lines'][0] }}</p>
+                            <p class="price">{{ hotel['price']['total'] }} {{ hotel['price']['currencyCode'] }}</p>
+                            <p><a href="{{ hotel['url'] }}" target="_blank" class="btn btn-primary">View Hotel</a></p>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <p>No hotels found for this city.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Bootstrap JS, Popper.js, and jQuery (required for Bootstrap functionality) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
