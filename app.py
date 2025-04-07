@@ -38,7 +38,7 @@ def get_access_token():
         return None
 
 # Function to get flight offers
-def get_flight_offers(origin, destination, departure_date, adults=1, max_results=5):
+def get_flight_offers(origin_code, destination_code, departure_date, adults=1, max_results=5):
     access_token = get_access_token()
     if not access_token:
         return {"error": "Failed to get access token"}
@@ -48,15 +48,17 @@ def get_flight_offers(origin, destination, departure_date, adults=1, max_results
     }
 
     params = {
-        'originLocationCode': origin,
-        'destinationLocationCode': destination,
+        'originLocationCode': origin_code,
+        'destinationLocationCode': destination_code,
         'departureDate': departure_date,
         'adults': adults,
         'currencyCode': 'USD',
         'max': max_results
     }
 
-    flight_url = 'https://test.api.amadeus.com/v2/shopping/flight-offers'
+    flight_url = 'https://test.api.amadeus.com/v2/shopping/flight-offers?'
+    print(access_token)
+    
     response = requests.get(flight_url, headers=headers, params=params)
 
     if response.status_code == 200:
@@ -159,6 +161,6 @@ def get_bot_response(user_message):
         return "You can find the API documentation here: https://test.api.amadeus.com/"
     else:
         return "I'm here to help! Could you tell me more about your travel plans?"
-
-if __name__ == '__main__':
-    app.run(debug=True)
+print(get_flight_offers("DCA", "DCK", "2025-06-05", adults=1, max_results=5))
+#if __name__ == '__main__':
+    #app.run(debug=True)
