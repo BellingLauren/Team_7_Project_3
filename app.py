@@ -56,9 +56,8 @@ def get_flight_offers(origin_code, destination_code, departure_date, adults=1, m
         'max': max_results
     }
 
-    flight_url = 'https://test.api.amadeus.com/v2/shopping/flight-offers?'
-    print(access_token)
-    
+    flight_url = 'https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=CLE&destinationLocationCode=NYC&departureDate=2025-05-01&adults=1&nonStop=false&currencyCode=USD&max=5'
+
     response = requests.get(flight_url, headers=headers, params=params)
 
     if response.status_code == 200:
@@ -130,7 +129,7 @@ def find_flights():
     departure_date = request.form.get('departure_date')
     return_date = request.form.get('return_date')
 
-    # Simulate flight results (you can replace this with real API calls)
+    # Get flight results using the Amadeus API
     flight_results = get_flight_offers(origin, destination, departure_date)
     return render_template('flight_results.html', flights=flight_results)
 
@@ -161,6 +160,6 @@ def get_bot_response(user_message):
         return "You can find the API documentation here: https://test.api.amadeus.com/"
     else:
         return "I'm here to help! Could you tell me more about your travel plans?"
-print(get_flight_offers("DCA", "DCK", "2025-06-05", adults=1, max_results=5))
-#if __name__ == '__main__':
-    #app.run(debug=True)
+
+if __name__ == '__main__':
+    app.run(debug=True)
