@@ -29,7 +29,8 @@
             margin-bottom: 20px;
         }
 
-        .user-message, .bot-message {
+        .user-message,
+        .bot-message {
             padding: 10px;
             border-radius: 5px;
             margin-bottom: 10px;
@@ -69,12 +70,43 @@
             width: 45%;
             margin-bottom: 10px;
         }
+
+        /* Flight search form styling */
+        .flight-search-form {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 30px;
+        }
     </style>
 </head>
 
 <body>
 
     <div class="container">
+
+        <!-- Flight Search Form -->
+        <div class="flight-search-form">
+            <h1 class="text-center">Flight Search</h1>
+            <form action="/find_flights" method="POST">
+                <label for="origin">Origin (Airport Code):</label>
+                <input type="text" id="origin" name="origin" class="form-control" required><br>
+
+                <label for="destination">Destination (Airport Code):</label>
+                <input type="text" id="destination" name="destination" class="form-control" required><br>
+
+                <label for="departure_date">Departure Date:</label>
+                <input type="date" id="departure_date" name="departure_date" class="form-control" required><br>
+
+                <label for="return_date">Return Date:</label>
+                <input type="date" id="return_date" name="return_date" class="form-control"><br>
+
+                <button type="submit" class="btn btn-primary btn-block">Search Flights</button>
+            </form>
+        </div>
+
+        <!-- Chatbot Interface -->
         <h1 class="text-center">Vacation Travel Bot</h1> <!-- Chatbot title -->
 
         <!-- Chatbox where the conversation happens -->
@@ -94,6 +126,7 @@
             <button class="btn btn-outline-success btn-custom" id="hotel-button">Check Hotel Results</button>
             <button class="btn btn-outline-warning btn-custom" id="tour-button">Check Tour Results</button>
         </div>
+
     </div>
 
     <!-- JavaScript to handle sending messages -->
