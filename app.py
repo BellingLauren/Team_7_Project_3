@@ -57,7 +57,7 @@ def get_flight_offers(origin_code, destination_code, departure_date, adults=1, m
     }
 
     flight_url = 'https://test.api.amadeus.com/v2/shopping/flight-offers?'
-    print(access_token)
+    
     
     response = requests.get(flight_url, headers=headers, params=params)
 
