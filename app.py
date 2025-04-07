@@ -56,14 +56,8 @@ def get_flight_offers(origin_code, destination_code, departure_date, adults=1, m
         'max': max_results
     }
 
-<<<<<<< HEAD
     flight_url = 'https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=CLE&destinationLocationCode=NYC&departureDate=2025-05-01&adults=1&nonStop=false&currencyCode=USD&max=5'
 
-=======
-    flight_url = 'https://test.api.amadeus.com/v2/shopping/flight-offers?'
-    
-    
->>>>>>> e2afbfa6a0337ea551c071e847c359ca035bc2cc
     response = requests.get(flight_url, headers=headers, params=params)
 
     if response.status_code == 200:
