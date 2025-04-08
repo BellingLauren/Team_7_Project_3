@@ -160,7 +160,7 @@ with tab1:
                 st.markdown("---")
 with tab2:
     st.subheader("Hotel Search")
-    city = st.text_input("Enter a city for hotel recommendations:", key="hotel_input")
+    city = city_to_iata(st.text_input("Enter a city for hotel recommendations:", key="hotel_input"))
     search_hotels = st.button("Search Hotels")
     if search_hotels and city:
         hotels = get_hotels(city)
@@ -177,7 +177,7 @@ with tab2:
                 st.markdown("---")
 with tab3:
     st.subheader("Tour Activities Search")
-    location = st.text_input("Enter a location for activities (city or latitude, longitude):", key="activities")
+    location = city_to_iata(st.text_input("Enter a location for activities (city or latitude, longitude):", key="activities"))
     search_tours = st.button("Search Tours and Activities")
     if search_tours and location:
         if ',' in location:
