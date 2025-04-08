@@ -2,14 +2,20 @@ import streamlit as st
 import pandas as pd
 import requests
 import time
+import os
+from dotenv import load_dotenv
+
+
 # Load IATA airport codes
 @st.cache_data
 def load_iata_data():
     return pd.read_csv("IATA_List.csv")
 iata_df = load_iata_data()
+
 # Amadeus API credentials
-client_id = 'RW5x5Bn2aMZYmgyHCyomxPetDteMmM2a'
-client_secret = 'sKvaa9jS36eO7OCL'
+load_dotenv()
+client_id = os.getenv("api_key")
+client_secret = os.getenv("api_secret")
 access_token = None
 token_expiry_time = 0
 def get_access_token():
@@ -30,6 +36,8 @@ def get_access_token():
         return access_token
     else:
         return None
+    
+# Function to get flight offers
 def get_flight_offers(origin, destination, date, adults=1, max_results=5):
     token = get_access_token()
     if not token:
@@ -46,6 +54,7 @@ def get_flight_offers(origin, destination, date, adults=1, max_results=5):
     url = 'https://test.api.amadeus.com/v2/shopping/flight-offers'
     response = requests.get(url, headers=headers, params=params)
     return response.json().get('data', []) if response.status_code == 200 else {"error": response.text}
+
 # Function to get hotel offers
 def get_hotels(city_code, radius=5):
     access_token = get_access_token()
@@ -67,7 +76,8 @@ def get_hotels(city_code, radius=5):
         return response.json()['data']
     else:
         return {"error": f"API Request failed: {response.status_code}, {response.text}"}
-    # Function to get tour activities
+
+# Function to get tour activities
 def get_tour_activities(latitude, longitude, radius=20):
     access_token = get_access_token()
     if not access_token:
@@ -87,6 +97,8 @@ def get_tour_activities(latitude, longitude, radius=20):
         return response.json()['data']
     else:
         return {"error": f"API Request failed: {response.status_code}, {response.text}"}
+
+# Chatbot Function
 def get_bot_response(msg):
     msg = msg.lower()
     if 'name' in msg:
@@ -107,7 +119,8 @@ def get_bot_response(msg):
         return "You can find the API documentation here: https://test.api.amadeus.com/"
     else:
         return "I'm here to help! Could you tell me more about your travel plans?"
-# UI
+
+# Streamlit Interface
 st.title(":airplane: Travel Planner & Assistant")
 tab1, tab2, tab3, tab4 = st.tabs(["Flight Search", "Find Hotels","Tour Activities Search","Chatbot"])
 with tab1:
