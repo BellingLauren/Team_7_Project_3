@@ -1,22 +1,25 @@
+import streamlit as st
+import pandas as pd
 import requests
-from flask import Flask, render_template, request, jsonify
 import time
 
-app = Flask(__name__, template_folder='templates')
+# Load IATA airport codes
+@st.cache_data
+def load_iata_data():
+    return pd.read_csv("IATA_List.csv")
 
-# Amadeus API Credentials
+iata_df = load_iata_data()
+
+# Amadeus API credentials
 client_id = 'RW5x5Bn2aMZYmgyHCyomxPetDteMmM2a'
 client_secret = 'sKvaa9jS36eO7OCL'
 
-# Global variable to store the access token and its expiry time
 access_token = None
 token_expiry_time = 0
 
-# Function to get the access token
 def get_access_token():
     global access_token, token_expiry_time
 
-    # Check if the token is still valid
     if access_token and time.time() < token_expiry_time:
         return access_token
 
@@ -28,138 +31,93 @@ def get_access_token():
     }
 
     response = requests.post(auth_url, data=auth_data)
-
     if response.status_code == 200:
         data = response.json()
         access_token = data['access_token']
-        token_expiry_time = time.time() + data['expires_in'] - 60  # Subtract 60 seconds to ensure token doesn't expire during use
+        token_expiry_time = time.time() + data['expires_in'] - 60
         return access_token
     else:
         return None
 
-# Function to get flight offers
-def get_flight_offers(origin_code, destination_code, departure_date, adults=1, max_results=5):
-    access_token = get_access_token()
-    if not access_token:
+def get_flight_offers(origin, destination, date, adults=1, max_results=5):
+    token = get_access_token()
+    if not token:
         return {"error": "Failed to get access token"}
 
-    headers = {
-        'Authorization': f'Bearer {access_token}'
-    }
-
+    headers = {'Authorization': f'Bearer {token}'}
     params = {
-        'originLocationCode': origin_code,
-        'destinationLocationCode': destination_code,
-        'departureDate': departure_date,
+        'originLocationCode': origin,
+        'destinationLocationCode': destination,
+        'departureDate': date,
         'adults': adults,
         'currencyCode': 'USD',
         'max': max_results
     }
 
-    flight_url = 'https://test.api.amadeus.com/v2/shopping/flight-offers'
-    
-    response = requests.get(flight_url, headers=headers, params=params)
+    url = 'https://test.api.amadeus.com/v2/shopping/flight-offers'
+    response = requests.get(url, headers=headers, params=params)
+    return response.json().get('data', []) if response.status_code == 200 else {"error": response.text}
 
-    if response.status_code == 200:
-        return response.json()['data']
-    else:
-        return {"error": f"API Request failed: {response.status_code}, {response.text}"}
-
-# Function to get hotel offers
-def get_hotels(city_code, radius=5):
-    access_token = get_access_token()
-    if not access_token:
-        return {"error": "Failed to get access token"}
-
-    headers = {
-        'Authorization': f'Bearer {access_token}'
-    }
-
-    params = {
-        'cityCode': city_code,
-        'radius': radius,
-        'radiusUnit': 'KM',
-        'ratings': '3,4,5',  # Optional: filter by star ratings
-        'hotelSource': 'ALL'  # ALL, BEDBANK, or DIRECTCHAIN
-    }
-
-    hotels_url = 'https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city'
-    response = requests.get(hotels_url, headers=headers, params=params)
-
-    if response.status_code == 200:
-        return response.json()['data']
-    else:
-        return {"error": f"API Request failed: {response.status_code}, {response.text}"}
-
-# Function to get tour activities
-def get_tour_activities(latitude, longitude, radius=20):
-    access_token = get_access_token()
-    if not access_token:
-        return {"error": "Failed to get access token"}
-
-    headers = {
-        'Authorization': f'Bearer {access_token}'
-    }
-
-    params = {
-        'latitude': latitude,
-        'longitude': longitude,
-        'radius': radius,
-        'currencyCode': 'USD'
-    }
-
-    tours_url = 'https://test.api.amadeus.com/v1/shopping/activities'
-    response = requests.get(tours_url, headers=headers, params=params)
-
-    if response.status_code == 200:
-        return response.json()['data']
-    else:
-        return {"error": f"API Request failed: {response.status_code}, {response.text}"}
-
-# Route for the home page with the flight search form
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-# Route to handle flight search and display results
-@app.route('/find_flights', methods=['POST'])
-def find_flights():
-    origin = request.form.get('origin')
-    destination = request.form.get('destination')
-    departure_date = request.form.get('departure_date')
-    return_date = request.form.get('return_date')
-
-    # Get flight results using the Amadeus API
-    flight_results = get_flight_offers(origin, destination, departure_date)
-    return render_template('flight_results.html', flights=flight_results)
-
-# Route to handle chatbot conversation
-@app.route('/chat', methods=['POST'])
-def chat():
-    user_message = request.form['user_message']
-    bot_response = get_bot_response(user_message)
-    return jsonify({'bot_message': bot_response})
-
-# Chatbot conversation logic
-def get_bot_response(user_message):
-    if 'name' in user_message.lower():
+def get_bot_response(msg):
+    msg = msg.lower()
+    if 'name' in msg:
         return "Nice to meet you! What is your name?"
-    elif 'travel' in user_message.lower():
+    elif 'travel' in msg:
         return "Great! Where are you looking to travel?"
-    elif 'date' in user_message.lower():
+    elif 'date' in msg:
         return "What date are you looking to travel?"
-    elif 'airport' in user_message.lower():
+    elif 'airport' in msg:
         return "What airport are you flying from, and to which airport?"
-    elif 'flight' in user_message.lower():
-        return "I can help you find flights! Please check out this API: <a href='https://test.api.amadeus.com/v2/shopping/flight-offers' target='_blank'>Flight API</a>"
-    elif 'hotel' in user_message.lower():
-        return "I can help you find hotels! Please check out this API: <a href='https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city' target='_blank'>Hotel API</a>"
-    elif 'tour' in user_message.lower() or 'activity' in user_message.lower():
-        return "I can help you find tours and activities! Please check out this API: <a href='https://test.api.amadeus.com/v1/shopping/activities' target='_blank'>Tour/Activity API</a>"
-    elif 'api' in user_message.lower():
+    elif 'flight' in msg:
+        return "I can help you find flights! Please provide details above."
+    elif 'hotel' in msg:
+        return "I can help you find hotels! Hotel search is coming soon!"
+    elif 'tour' in msg or 'activity' in msg:
+        return "I can help you find tours and activities! Feature coming soon!"
+    elif 'api' in msg:
         return "You can find the API documentation here: https://test.api.amadeus.com/"
     else:
         return "I'm here to help! Could you tell me more about your travel plans?"
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# UI
+st.title("✈️ Travel Planner & Assistant")
+
+tab1, tab2 = st.tabs(["Flight Search", "Chatbot"])
+
+with tab1:
+    st.subheader("Find Flights")
+   #origin = st.selectbox("From (Origin Airport)", iata_df['IATA Code'].dropna().unique())
+    origin = st.selectbox("From (Origin Airport)", iata_df['iata_code'].dropna().unique())
+    destination = st.selectbox("To (Destination Airport)", iata_df['iata_code'].dropna().unique())
+    date = st.date_input("Departure Date")
+    search = st.button("Search Flights")
+
+    if search:
+        results = get_flight_offers(origin, destination, date.strftime("%Y-%m-%d"))
+        if isinstance(results, dict) and "error" in results:
+            st.error(results["error"])
+        elif len(results) == 0:
+            st.info("No flights found.")
+        else:
+            for flight in results:
+                price = flight['price']['total']
+                segments = flight['itineraries'][0]['segments']
+                st.markdown(f"**Price:** ${price}")
+                for seg in segments:
+                    st.write(f"{seg['departure']['iataCode']} → {seg['arrival']['iataCode']}")
+                    st.write(f"{seg['departure']['at']} to {seg['arrival']['at']}")
+                st.markdown("---")
+
+with tab2:
+    st.subheader("Travel Assistant Chatbot")
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+
+    user_input = st.text_input("Say something to the assistant:")
+    if user_input:
+        response = get_bot_response(user_input)
+        st.session_state.chat_history.append(("You", user_input))
+        st.session_state.chat_history.append(("Bot", response))
+
+    for sender, message in st.session_state.chat_history:
+        st.markdown(f"**{sender}:** {message}")
