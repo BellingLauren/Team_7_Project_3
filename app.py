@@ -2,14 +2,13 @@ import streamlit as st
 import pandas as pd
 import requests
 import time
-# Load IATA airport codes
-@st.cache_data
-def load_iata_data():
-    return pd.read_csv("IATA_List.csv")
-iata_df = load_iata_data()
+import os
+from dotenv import load_dotenv
+   
 # Amadeus API credentials
-client_id = 'RW5x5Bn2aMZYmgyHCyomxPetDteMmM2a'
-client_secret = 'sKvaa9jS36eO7OCL'
+load_dotenv()
+client_id = os.getenv("api_key")
+client_secret = os.getenv("api_secret")
 access_token = None
 token_expiry_time = 0
 def get_access_token():
@@ -30,6 +29,29 @@ def get_access_token():
         return access_token
     else:
         return None
+    
+#Function to convert city name to destination IATA code
+def city_to_iata(city_name):
+    token = get_access_token()
+    if not token:
+        return {"error": "Failed to get access token"}
+    headers = {'Authorization': f'Bearer {token}'}
+    params = {
+        'keyword': city_name,
+        'subType': 'CITY' 
+    }
+    url = 'https://test.api.amadeus.com/v1/reference-data/locations'
+    response = requests.get(url, headers=headers, params=params)
+    if response.status_code == 200:
+        data = response.json().get('data', [])
+        if data:
+            return data[0].get('iataCode')
+        else:
+            return None
+    else:
+        return {"error": response.text}
+    
+# Function to get flight offers
 def get_flight_offers(origin, destination, date, adults=1, max_results=5):
     token = get_access_token()
     if not token:
@@ -46,6 +68,7 @@ def get_flight_offers(origin, destination, date, adults=1, max_results=5):
     url = 'https://test.api.amadeus.com/v2/shopping/flight-offers'
     response = requests.get(url, headers=headers, params=params)
     return response.json().get('data', []) if response.status_code == 200 else {"error": response.text}
+
 # Function to get hotel offers
 def get_hotels(city_code, radius=5):
     access_token = get_access_token()
@@ -67,7 +90,8 @@ def get_hotels(city_code, radius=5):
         return response.json()['data']
     else:
         return {"error": f"API Request failed: {response.status_code}, {response.text}"}
-    # Function to get tour activities
+
+# Function to get tour activities
 def get_tour_activities(latitude, longitude, radius=20):
     access_token = get_access_token()
     if not access_token:
@@ -87,6 +111,8 @@ def get_tour_activities(latitude, longitude, radius=20):
         return response.json()['data']
     else:
         return {"error": f"API Request failed: {response.status_code}, {response.text}"}
+
+# Chatbot Function
 def get_bot_response(msg):
     msg = msg.lower()
     if 'name' in msg:
@@ -107,16 +133,21 @@ def get_bot_response(msg):
         return "You can find the API documentation here: https://test.api.amadeus.com/"
     else:
         return "I'm here to help! Could you tell me more about your travel plans?"
+<<<<<<< HEAD
 # UI
 st.title("✈️ Travel Planner & Assistant")
 
+=======
+
+# Streamlit Interface
+st.title(":airplane: Travel Planner & Assistant")
+>>>>>>> c645d65aa79e56ec9eefcc71e07929c09e1ac063
 tab1, tab2, tab3, tab4 = st.tabs(["Flight Search", "Find Hotels","Tour Activities Search","Chatbot"])
 
 with tab1:
     st.subheader("Find Flights")
-   #origin = st.selectbox("From (Origin Airport)", iata_df['IATA Code'].dropna().unique())
-    origin = st.selectbox("From (Origin Airport)", iata_df['iata_code'].dropna().unique())
-    destination = st.selectbox("To (Destination Airport)", iata_df['iata_code'].dropna().unique())
+    origin = city_to_iata(st.text_input("From (Origin City)", key="origin_city_input"))
+    destination = city_to_iata(st.text_input("To (Destination City)", key="destination_city_input"))
     date = st.date_input("Departure Date")
     search = st.button("Search Flights")
     if search:
@@ -136,9 +167,13 @@ with tab1:
                 st.markdown("---")
 with tab2:
     st.subheader("Hotel Search")
+<<<<<<< HEAD
     city = st.text_input("Enter a city for hotel recommendations:")
     st.subheader("Hotel Search")
     city = st.text_input("Enter a city for hotel recommendations:")
+=======
+    city = st.text_input("Enter a city for hotel recommendations:", key="hotel_input")
+>>>>>>> c645d65aa79e56ec9eefcc71e07929c09e1ac063
     search_hotels = st.button("Search Hotels")
     if search_hotels and city:
         hotels = get_hotels(city)
@@ -166,7 +201,7 @@ with tab2:
                 st.markdown("---")
 with tab3:
     st.subheader("Tour Activities Search")
-    location = st.text_input("Enter a location for activities (city or latitude, longitude):")
+    location = st.text_input("Enter a location for activities (city or latitude, longitude):", key="activities")
     search_tours = st.button("Search Tours and Activities")
     if search_tours and location:
         if ',' in location:
@@ -216,7 +251,7 @@ with tab4:
     st.subheader("Travel Assistant Chatbot")
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
-    user_input = st.text_input("Say something to the assistant:")
+    user_input = st.text_input("Say something to the assistant:", key="user_input")
     if user_input:
         response = get_bot_response(user_input)
         st.session_state.chat_history.append(("You", user_input))
