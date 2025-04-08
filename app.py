@@ -58,6 +58,57 @@ def get_flight_offers(origin, destination, date, adults=1, max_results=5):
     response = requests.get(url, headers=headers, params=params)
     return response.json().get('data', []) if response.status_code == 200 else {"error": response.text}
 
+# Function to get hotel offers
+def get_hotels(city_code, radius=5):
+    access_token = get_access_token()
+    if not access_token:
+        return {"error": "Failed to get access token"}
+
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+
+    params = {
+        'cityCode': city_code,
+        'radius': radius,
+        'radiusUnit': 'KM',
+        'ratings': '3,4,5',  # Optional: filter by star ratings
+        'hotelSource': 'ALL'  # ALL, BEDBANK, or DIRECTCHAIN
+    }
+
+    hotels_url = 'https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city'
+    response = requests.get(hotels_url, headers=headers, params=params)
+
+    if response.status_code == 200:
+        return response.json()['data']
+    else:
+        return {"error": f"API Request failed: {response.status_code}, {response.text}"}
+    
+    # Function to get tour activities
+def get_tour_activities(latitude, longitude, radius=20):
+    access_token = get_access_token()
+    if not access_token:
+        return {"error": "Failed to get access token"}
+
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+
+    params = {
+        'latitude': latitude,
+        'longitude': longitude,
+        'radius': radius,
+        'currencyCode': 'USD'
+    }
+
+    tours_url = 'https://test.api.amadeus.com/v1/shopping/activities'
+    response = requests.get(tours_url, headers=headers, params=params)
+
+    if response.status_code == 200:
+        return response.json()['data']
+    else:
+        return {"error": f"API Request failed: {response.status_code}, {response.text}"}
+
 def get_bot_response(msg):
     msg = msg.lower()
     if 'name' in msg:
@@ -109,6 +160,27 @@ with tab1:
                 st.markdown("---")
 
 with tab2:
+    st.subheader("Find Hotels")
+    city_code = st.selectbox("City Code", iata_df['iata_code'].dropna().unique())
+    radius = st.slider("Search Radius (KM)", min_value=1, max_value=50, value=5)
+    search_hotels = st.button("Search Hotels")
+
+    if search_hotels:
+        hotel_results = get_hotels(city_code, radius)
+        if isinstance(hotel_results, dict) and "error" in hotel_results:
+            st.error(hotel_results["error"])
+        elif len(hotel_results) == 0:
+            st.info("No hotels found.")
+        else:
+            for hotel in hotel_results:
+                st.markdown(f"**Hotel:** {hotel['name']}")
+                st.write(f"Address: {hotel.get('address', {}).get('lines', ['N/A'])[0]}, {hotel.get('address', {}).get('cityName', 'N/A')}")
+                st.write(f"Category: {hotel.get('rating', 'N/A')}-star")
+                if 'contact' in hotel and 'phone' in hotel['contact']:
+                    st.write(f"Phone: {hotel['contact']['phone']}")
+                st.markdown("---")
+
+with tab3:
     st.subheader("Travel Assistant Chatbot")
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
