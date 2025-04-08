@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import time
+
 # Load IATA airport codes
 @st.cache_data
 def load_iata_data():
