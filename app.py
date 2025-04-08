@@ -133,7 +133,7 @@ def get_bot_response(msg):
 # UI
 st.title("✈️ Travel Planner & Assistant")
 
-tab1, tab2 = st.tabs(["Flight Search", "Chatbot"])
+tab1, tab2, tab3, tab4 = st.tabs(["Flight Search", "Find Hotels","Tour Activities Search","Chatbot"])
 
 with tab1:
     st.subheader("Find Flights")
@@ -160,27 +160,51 @@ with tab1:
                 st.markdown("---")
 
 with tab2:
-    st.subheader("Find Hotels")
-    city_code = st.selectbox("City Code", iata_df['iata_code'].dropna().unique())
-    radius = st.slider("Search Radius (KM)", min_value=1, max_value=50, value=5)
+    st.subheader("Hotel Search")
+    city = st.text_input("Enter a city for hotel recommendations:")
     search_hotels = st.button("Search Hotels")
 
-    if search_hotels:
-        hotel_results = get_hotels(city_code, radius)
-        if isinstance(hotel_results, dict) and "error" in hotel_results:
-            st.error(hotel_results["error"])
-        elif len(hotel_results) == 0:
+    if search_hotels and city:
+        hotels = get_hotels(city)
+        if isinstance(hotels, dict) and "error" in hotels:
+            st.error(hotels["error"])
+        elif len(hotels) == 0:
             st.info("No hotels found.")
         else:
-            for hotel in hotel_results:
-                st.markdown(f"**Hotel:** {hotel['name']}")
-                st.write(f"Address: {hotel.get('address', {}).get('lines', ['N/A'])[0]}, {hotel.get('address', {}).get('cityName', 'N/A')}")
-                st.write(f"Category: {hotel.get('rating', 'N/A')}-star")
-                if 'contact' in hotel and 'phone' in hotel['contact']:
-                    st.write(f"Phone: {hotel['contact']['phone']}")
+            for hotel in hotels:
+                st.markdown(f"**Hotel Name:** {hotel['name']}")
+                st.write(f"**Address:** {hotel['address']['lines'][0]}")
+                st.write(f"**Distance from city center:** {hotel['distance']['value']} {hotel['distance']['unit']}")
+                st.write(f"**Rating:** {hotel.get('rating', 'N/A')}")
                 st.markdown("---")
 
 with tab3:
+    st.subheader("Tour Activities Search")
+    location = st.text_input("Enter a location for activities (city or latitude, longitude):")
+    search_tours = st.button("Search Tours and Activities")
+
+    if search_tours and location:
+        if ',' in location:
+            latitude, longitude = map(float, location.split(','))
+            tours = get_tour_activities(latitude, longitude)
+        else:
+            # In a real app, you'd need a function to convert city name to lat, lon
+            st.info("For now, please use latitude,longitude format.")
+            tours = []
+
+        if isinstance(tours, dict) and "error" in tours:
+            st.error(tours["error"])
+        elif len(tours) == 0:
+            st.info("No activities found.")
+        else:
+            for tour in tours:
+                st.markdown(f"**Activity Name:** {tour['name']}")
+                st.write(f"**Category:** {tour['category']}")
+                st.write(f"**Price:** ${tour.get('price', {}).get('total', 'N/A')}")
+                st.markdown("---")
+
+
+with tab4:
     st.subheader("Travel Assistant Chatbot")
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
