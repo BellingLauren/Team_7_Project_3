@@ -1,4 +1,14 @@
-# ✈️ Smart Travel Planner & Assistant
+# ✈️Itinera Smart Travel Planner & Assistant
+
+## 👥 Contributors  
+**Bryan Paul, Lauren Belling, George Racolta, John DeGarmo, Josh Rahman**
+
+## 📽️ Project Presentation
+View the full slideshow presentation [here](https://docs.google.com/presentation/d/1blsT5YexcNUG13J-qSFze73j6cf1fgh-WKNKphfgRdU/view).
+
+Or watch it in slideshow mode [here](https://docs.google.com/presentation/d/1blsT5YexcNUG13J-qSFze73j6cf1fgh-WKNKphfgRdU/present).
+
+
 
 This project is a web-based travel planning application that integrates real-time flight data and provides a chatbot assistant using the **Amadeus Travel APIs**. It features a **Streamlit interface**, enhanced by a built-in **chatbot assistant** to guide users through their travel search process.
 
@@ -26,7 +36,6 @@ This project is a web-based travel planning application that integrates real-tim
 
 ```
 ├── app.py                  # Streamlit app
-├── styles.css              # Styling (Flask legacy, not used in Streamlit)
 ├── IATA_List.csv           # List of IATA airport codes (used by Streamlit app)
 ├── USA_Airports_IATA.csv   # Additional airport data (not directly used in app logic)
 ├── Project_3_Pipeline.ipynb# Development notebook (Jupyter)
