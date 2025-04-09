@@ -4,6 +4,7 @@ import time
 import os
 from dotenv import load_dotenv
 from transformers import pipeline
+import openai
    
 # Amadeus API credentials
 load_dotenv()
@@ -11,6 +12,8 @@ client_id = os.getenv("api_key")
 client_secret = os.getenv("api_secret")
 access_token = None
 token_expiry_time = 0
+
+openai.api_key = os.getenv("OPENAI_API_KEY") 
 
 def get_access_token():
     global access_token, token_expiry_time
@@ -113,45 +116,34 @@ def get_tour_activities(latitude, longitude, radius=20):
     else:
         return {"error": f"API Request failed: {response.status_code}, {response.text}"}
 
-# Add the Hugging Face pipeline
-@st.cache_resource
-def load_text_generation_pipeline():
-    try:
-        with st.spinner("Loading AI language model... This may take a moment the first time."):
-            text_generator = pipeline('text-generation', model='gpt2')
-            return text_generator
-    except Exception as e:
-        st.error(f"Failed to load the language model: {str(e)}")
-        return None
-    
+# Function to get response using OpenAI's GPT model
 def get_bot_response(user_input, destination=None):
-    text_generator = load_text_generation_pipeline()
-    
-    if text_generator is None:
-        return "Sorry, the AI model is currently unavailable."
-    
-    if destination:
-        prompt = f"Travel assistant helping with {destination}. Question: {user_input}\nAnswer:"
-    else:
-        prompt = f"Travel assistant. Question: {user_input}\nAnswer:"
-    
     try:
-        results = text_generator(
-            prompt,
-            max_length=100,
-            num_return_sequences=1,
+        
+        prompt = f"Travel assistant helping with {destination}. User's question: {user_input}\nAnswer:" if destination else f"Travel assistant. User's question: {user_input}\nAnswer:"
+        
+        # Request to OpenAI API (GPT-3.5 or GPT-4)
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            messages=[
+                {"role": "system", "content": "You are a helpful travel assistant."},
+                {"role": "user", "content": user_input}
+            ],
+            max_tokens=150,  
             temperature=0.7,
-            top_k=50,
-            do_sample=True
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0.6,
         )
-        
-        generated_text = results[0]['generated_text']
-        response = generated_text.replace(prompt, "").strip()
-        
-        if not response or len(response) < 5:
+
+        # Extracting the response
+        generated_text = response['choices'][0]['message']['content'].strip()
+
+        # Ensure a valid response is generated
+        if not generated_text or len(generated_text) < 5:
             return "I'm not sure how to help with that. Could you please ask differently?"
-        
-        return response
+
+        return generated_text
     except Exception as e:
         return f"Sorry, I couldn't process that request. Error: {str(e)}"
 
@@ -234,13 +226,15 @@ with tab4:
         destination = st.session_state.destination_city_input
     
     # Display a notice about the AI assistant
-    st.info("This AI assistant can help with travel questions and suggestions.")
+    st.info("""Welcome to your travel assistant! ✈️🌍
+    I can help you with destination suggestions, travel tips, booking options, and more. 
+    How can I assist you with your travel plans today?""")
     
     # User input
     user_input = st.text_input("Ask me about your trip:", key="user_input")
     
     if user_input:
-        # Get response using the Hugging Face pipeline
+        # Get response using the OpenAI API
         response = get_bot_response(user_input, destination)
         
         # Add to chat history
