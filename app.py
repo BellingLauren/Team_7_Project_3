@@ -1,9 +1,9 @@
 import streamlit as st
-import pandas as pd
 import requests
 import time
 import os
 from dotenv import load_dotenv
+from transformers import pipeline
    
 # Amadeus API credentials
 load_dotenv()
@@ -11,6 +11,7 @@ client_id = os.getenv("api_key")
 client_secret = os.getenv("api_secret")
 access_token = None
 token_expiry_time = 0
+
 def get_access_token():
     global access_token, token_expiry_time
     if access_token and time.time() < token_expiry_time:
@@ -112,31 +113,52 @@ def get_tour_activities(latitude, longitude, radius=20):
     else:
         return {"error": f"API Request failed: {response.status_code}, {response.text}"}
 
-# Chatbot Function
-def get_bot_response(msg):
-    msg = msg.lower()
-    if 'name' in msg:
-        return "Nice to meet you! What is your name?"
-    elif 'travel' in msg:
-        return "Great! Where are you looking to travel?"
-    elif 'date' in msg:
-        return "What date are you looking to travel?"
-    elif 'airport' in msg:
-        return "What airport are you flying from, and to which airport?"
-    elif 'flight' in msg:
-        return "I can help you find flights! Please provide details above."
-    elif 'hotel' in msg:
-        return "I can help you find hotels! Hotel search is coming soon!"
-    elif 'tour' in msg or 'activity' in msg:
-        return "I can help you find tours and activities! Feature coming soon!"
-    elif 'api' in msg:
-        return "You can find the API documentation here: https://test.api.amadeus.com/"
+# Add the Hugging Face pipeline
+@st.cache_resource
+def load_text_generation_pipeline():
+    try:
+        with st.spinner("Loading AI language model... This may take a moment the first time."):
+            text_generator = pipeline('text-generation', model='gpt2')
+            return text_generator
+    except Exception as e:
+        st.error(f"Failed to load the language model: {str(e)}")
+        return None
+    
+def get_bot_response(user_input, destination=None):
+    text_generator = load_text_generation_pipeline()
+    
+    if text_generator is None:
+        return "Sorry, the AI model is currently unavailable."
+    
+    if destination:
+        prompt = f"Travel assistant helping with {destination}. Question: {user_input}\nAnswer:"
     else:
-        return "I'm here to help! Could you tell me more about your travel plans?"
+        prompt = f"Travel assistant. Question: {user_input}\nAnswer:"
+    
+    try:
+        results = text_generator(
+            prompt,
+            max_length=100,
+            num_return_sequences=1,
+            temperature=0.7,
+            top_k=50,
+            do_sample=True
+        )
+        
+        generated_text = results[0]['generated_text']
+        response = generated_text.replace(prompt, "").strip()
+        
+        if not response or len(response) < 5:
+            return "I'm not sure how to help with that. Could you please ask differently?"
+        
+        return response
+    except Exception as e:
+        return f"Sorry, I couldn't process that request. Error: {str(e)}"
 
 # Streamlit Interface
 st.title(":airplane: Travel Planner & Assistant")
 tab1, tab2, tab3, tab4 = st.tabs(["Flight Search", "Find Hotels","Tour Activities Search","Chatbot"])
+
 with tab1:
     st.subheader("Find Flights")
     origin = city_to_iata(st.text_input("From (Origin City)", key="origin_city_input"))
@@ -158,6 +180,7 @@ with tab1:
                     st.write(f"{seg['departure']['iataCode']} → {seg['arrival']['iataCode']}")
                     st.write(f"{seg['departure']['at']} to {seg['arrival']['at']}")
                 st.markdown("---")
+
 with tab2:
     st.subheader("Hotel Search")
     city = city_to_iata(st.text_input("Enter a city for hotel recommendations:", key="hotel_input"))
@@ -171,18 +194,18 @@ with tab2:
         else:
             for hotel in hotels:
                 st.markdown(f"**Hotel Name:** {hotel['name']}")
-                st.write(f"**Address:** {hotel['address']['lines'][0]}")
                 st.write(f"**Distance from city center:** {hotel['distance']['value']} {hotel['distance']['unit']}")
                 st.write(f"**Rating:** {hotel.get('rating', 'N/A')}")
                 st.markdown("---")
+
 with tab3:
     st.subheader("Tour Activities Search")
     location = city_to_iata(st.text_input("Enter a location for activities (city or latitude, longitude):", key="activities"))
     search_tours = st.button("Search Tours and Activities")
     if search_tours and location:
         if ',' in location:
-            latitude, longitude = map(float, location.split(','))
-            tours = get_tour_activities(latitude, longitude)
+            location = map(float, location.split(','))
+            tours = get_tour_activities(location)
         else:
             # In a real app, you'd need a function to convert city name to lat, lon
             st.info("For now, please use latitude,longitude format.")
@@ -197,14 +220,36 @@ with tab3:
                 st.write(f"**Category:** {tour['category']}")
                 st.write(f"**Price:** ${tour.get('price', {}).get('total', 'N/A')}")
                 st.markdown("---")
+
 with tab4:
     st.subheader("Travel Assistant Chatbot")
+    
+    # Initialize chat history if it doesn't exist
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
-    user_input = st.text_input("Say something to the assistant:", key="user_input")
+    
+    # Get the destination from the other tabs if available
+    destination = None
+    if "destination_city_input" in st.session_state and st.session_state.destination_city_input:
+        destination = st.session_state.destination_city_input
+    
+    # Display a notice about the AI assistant
+    st.info("This AI assistant can help with travel questions and suggestions.")
+    
+    # User input
+    user_input = st.text_input("Ask me about your trip:", key="user_input")
+    
     if user_input:
-        response = get_bot_response(user_input)
+        # Get response using the Hugging Face pipeline
+        response = get_bot_response(user_input, destination)
+        
+        # Add to chat history
         st.session_state.chat_history.append(("You", user_input))
         st.session_state.chat_history.append(("Bot", response))
+    
+    # Display chat history
     for sender, message in st.session_state.chat_history:
-        st.markdown(f"**{sender}:** {message}")
+        if sender == "You":
+            st.markdown(f"**{sender}:** {message}")
+        else:
+            st.markdown(f"**AI Travel Assistant:** {message}")
