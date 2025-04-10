@@ -323,6 +323,14 @@ def ask_about_hotel(hotel_name, destination_city):
     # Record query for ML
     process_user_input(query, destination_city)
 
+
+def get_transcript_text(
+    file_path="/mnt/c/Users/degar/OneDrive/Desktop/Team_7_Project_3/audiototext.txt"
+):
+    with open(file_path, "r", encoding="utf-8") as f:
+        transcript_text2 = f.read()
+    return transcript_text2
+TRANSCRIPT_TEXT2 = get_transcript_text()
 # Initialize session state variables for storing search results
 if "flight_results" not in st.session_state:
     st.session_state.flight_results = None
@@ -470,6 +478,7 @@ with left_column:
         elif st.session_state.has_searched:  # Only show this error if search was performed
             st.error("Please enter a valid destination city to find hotels")
 
+
 # Right column for chatbot
 with right_column:
     st.markdown("### Travel Assistant Chatbot")
@@ -502,7 +511,7 @@ with right_column:
     
     # Create a form for the chat input
     with st.form(key="chat_form"):
-        user_input = TRANSCRIPT_TEXT
+        user_input = TRANSCRIPT_TEXT2
         submit_button = st.form_submit_button("Send")
         
         if submit_button and user_input:
