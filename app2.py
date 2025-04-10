@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from bs4 import BeautifulSoup
 import urllib.parse
 #from whispertest import get_latest_transcription
-from text_var import TRANSCRIPT_TEXT
+from transcribe_mp3 import TRANSCRIPT_TEXT
 from chatbot_integration import (
     initialize_chatbot_state,
     update_suggestions,
