@@ -1,25 +1,20 @@
+# ✈️Itinera Smart Travel Planner & Assistant
 
-# ✈️ Itinera: Smart Travel Planner & Chatbot Assistant
+## 👥 Contributors  
+**Bryan Paul, Lauren Belling, George Racolta, John DeGarmo, Josh Rahman**
 
-**Team 7 - Project 3**  
-Contributors: Bryan Paul, Lauren Belling, George Racolta, John DeGarmo, Josh Rahman
+## 📽️ Project Presentation
+View the full slideshow presentation [here](https://docs.google.com/presentation/d/1blsT5YexcNUG13J-qSFze73j6cf1fgh-WKNKphfgRdU/view).
 
----
+Or watch it in slideshow mode [here](https://docs.google.com/presentation/d/1blsT5YexcNUG13J-qSFze73j6cf1fgh-WKNKphfgRdU/present).
 
-## 🎥 Project Presentation
 
-- [View Slideshow (Editable)](https://docs.google.com/presentation/d/1blsT5YexcNUG13J-qSFze73j6cf1fgh-WKNKphfgRdU/view)
-- [Watch Slideshow (Presentation Mode)](https://docs.google.com/presentation/d/1blsT5YexcNUG13J-qSFze73j6cf1fgh-WKNKphfgRdU/present)
 
----
-
-## 🎯 Overview
-
-**Itinera** is an AI-powered, web-based travel assistant that streamlines the trip planning experience by integrating real-time flight and hotel data, a predictive chatbot, and voice-based input using Whisper. Built with Streamlit and powered by Amadeus and Google APIs, Itinera offers intuitive tools to explore destinations and plan trips interactively.
+This project is a web-based travel planning application that integrates real-time flight data and provides a chatbot assistant using the **Amadeus Travel APIs**. It features a **Streamlit interface**, enhanced by a built-in **chatbot assistant** to guide users through their travel search process.
 
 ---
 
-## 🌐 Features
+## 🌐 Project Features
 
 ### Data Sources
 - The project uses multiple external and internal data sources:
@@ -32,20 +27,21 @@ Contributors: Bryan Paul, Lauren Belling, George Racolta, John DeGarmo, Josh Rah
 
 - Search history from search_history.csv is used to train the predictive model​predictive_chatbot.
 
-### 🚀 Travel Search
-- **Real-time flight and hotel data** via Amadeus API.
-- **Google Flights integration** for direct booking.
-- Dynamic suggestions powered by machine learning.
+### ✅ Streamlit App
+- Interactive UI using tabs for:
+  - **Flight Search**: Users select origin, destination, and departure date to get live flight options.
+  - **Chatbot Assistant**: Offers conversational assistance for trip planning.
+- Reads and utilizes IATA airport codes (`IATA_List.csv`).
 
-### 🤖 Smart Chatbot
-- Predictive, learning-based assistant for:
-  - Travel tips
-  - Destination info
-  - Search assistance
-- Personalized query suggestions using a TF-IDF + K-Means/Near Neighbors ML model【29†source】.
-- Learns and adapts from user queries over time【28†source】.
+### ✅ Chatbot Features
+- Provides friendly, dynamic responses for:
+  - Travel locations
+  - Dates
+  - Airports
+  - APIs (Flights, Hotels, Tours)
+- Helps guide users in formulating search queries.
 
-### 🗣️ Voice-to-Text Support
+---### 🗣️ Voice-to-Text Support
 - Powered by **OpenAI's Whisper** via Gradio interface【21†source】【23†source】.
 - Converts voice commands into travel queries.
 
@@ -58,115 +54,92 @@ Contributors: Bryan Paul, Lauren Belling, George Racolta, John DeGarmo, Josh Rah
 
 - It includes logic to update counts, avoid duplicates, and save updated model data, ensuring consistent ML behavior.
 
----
-
-## 🛠️ Tech Stack
-
-| Area            | Technologies                              |
-|-----------------|-------------------------------------------|
-| UI              | Streamlit, Gradio, HTML/CSS               |
-| ML & Chatbot    | Scikit-learn, Pandas, TF-IDF, KMeans, NearestNeighbors, Hugging Face |
-| APIs            | Amadeus, Google Places, Google Flights    |
-| Audio Handling  | Whisper (Gradio)                          |
-| Data            | IATA Codes (CSV)                          |
-| Others          | BeautifulSoup, Requests, ffmpeg (for MP3 conversion) |
-
----
-
-## 🧠 Predictive Chatbot
-
-- Learns from past queries saved in `search_history.csv`.
-- Trained on TF-IDF vectorized query data with KMeans for common topic clustering.
-- Provides adaptive suggestions based on destination【28†source】.
-
----
-
-## 📁 Key Files & Structure
+## 📁 Project Structure
 
 ```
-├── app2.py                    # Main Streamlit app
-├── chatbot_integration.py     # Chatbot state/suggestion handler
-├── predictive_chatbot.py      # Core ML chatbot class
-├── text_var.py                # Shared variables (e.g., transcript text)
-├── transcribe_mp32.py         # Whisper audio transcription w/ file conversion
-├── speaktotext.py             # Whisper-based Gradio voice app
-├── whisper.py                 # Alternative Whisper demo (Hindi)
-├── IATA_List.csv              # IATA airport code reference
-├── search_history.csv         # CSV tracking user queries
-├── chatbot_model.pkl          # Pickled ML model and vectorizer
-├── styles.css                 # Custom styles
-├── audiototext.txt            # Output from voice transcription
-├── Project_3_Pipeline.ipynb   # Development notebook
+├── app.py                  # Streamlit app
+├── IATA_List.csv           # List of IATA airport codes (used by Streamlit app)
+├── USA_Airports_IATA.csv   # Additional airport data (not directly used in app logic)
+├── Project_3_Pipeline.ipynb# Development notebook (Jupyter)
 ```
 
 ---
 
-## 📦 Installation
+## 🔧 Installation
 
-### Clone & Set Up
-
+### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/itinera-travel-assistant.git
-cd itinera-travel-assistant
+git clone https://github.com/your-username/smart-travel-assistant.git
+cd smart-travel-assistant
+```
+
+### 2. Install Dependencies
+Create a virtual environment and install packages:
+```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+
 pip install -r requirements.txt
 ```
 
-### Sample `requirements.txt`
-
+Sample `requirements.txt`:
 ```
 streamlit
-pandas
-scikit-learn
 requests
-transformers
-gradio
-python-dotenv
-beautifulsoup4
+pandas
 ```
 
 ---
 
-## 🔐 API Keys (Environment Variables)
-
-Create a `.env` file and add the following:
+## 🚀 Running the Application
 
 ```bash
-api_key=YOUR_AMADEUS_CLIENT_ID
-api_secret=YOUR_AMADEUS_CLIENT_SECRET
-GOOGLE_PLACES_API_KEY=YOUR_GOOGLE_PLACES_KEY
+streamlit run app.py
 ```
 
 ---
 
-## 🚀 Run the App
+## 🔐 API Configuration
 
-```bash
-streamlit run app2.py
+The app uses Amadeus APIs:
+- Flight Offers
+
+Replace the following credentials with your own in `app.py`:
+```python
+client_id = 'YOUR_CLIENT_ID'
+client_secret = 'YOUR_CLIENT_SECRET'
 ```
 
----
-
-## 🔊 Launch Voice Assistant
-
-```bash
-python speaktotext.py
-```
-
-This opens a Gradio interface for real-time voice recognition using Whisper.
+Sign up and get credentials here: [Amadeus for Developers](https://developers.amadeus.com/)
 
 ---
 
-## 🔮 Future Enhancements
+## 💬 Chatbot Logic
 
-- LLM-based contextual chatbot (GPT).
-- Enhanced hotel/tour recommendations.
-- Save and manage itineraries.
-- Natural language understanding for broader queries.
+The chatbot is rule-based and responds to specific keywords like:
+- `travel`, `flight`, `hotel`, `tour`, `api`, `name`, `date`, `airport`
+- Responses are tailored for user engagement and guidance.
 
 ---
+
+## 📌 Future Enhancements
+
+- Add hotel and tour search in Streamlit.
+- Upgrade chatbot with NLP/LLM capabilities.
+- Persist conversation history and booking preferences.
+
+---
+
+
+## 🎥 Demo Video
+
+Watch a screen recording of our Streamlit travel planner app in action:
+
+➡️ [Click here to download or view the demo video](20250410-2205-11.2667297.mp4)
+
+This video walks through how a user can search for flights and hotels, interact with the chatbot assistant, and use machine learning–powered suggestions for a smoother travel planning experience.
+
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. See `LICENSE` file for more details.
