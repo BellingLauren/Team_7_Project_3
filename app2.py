@@ -325,7 +325,7 @@ def ask_about_hotel(hotel_name, destination_city):
 
 
 def get_transcript_text(
-    file_path="/mnt/c/Users/degar/OneDrive/Desktop/Team_7_Project_3/audiototext.txt"
+    file_path = "C:\Users\Bryan\Desktop\Final_Project\Team_7_Project_3\audiototext.txt"
 ):
     with open(file_path, "r", encoding="utf-8") as f:
         transcript_text2 = f.read()

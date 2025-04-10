@@ -29,8 +29,8 @@ def transcribe_mp3(mp3_path: str, output_path: str):
         f.write(result["text"] + "\n")
 if __name__ == "__main__":
     #MP3_FILE = "/mnt/c/Users/degar/OneDrive/Desktop/Team_7_Project_3/Emotions.mp3"
-    MP3_FILE = "/mnt/c/Users/degar/OneDrive/Desktop/Team_7_Project_3/Recording.m4a"
-    OUTPUT_FILE = "/mnt/c/Users/degar/OneDrive/Desktop/Team_7_Project_3/audiototext.txt"
+    MP3_FILE = "C:\Users\Bryan\Desktop\Final_Project\Team_7_Project_3\Recording.m4a"
+    OUTPUT_FILE = "C:\Users\Bryan\Desktop\Final_Project\Team_7_Project_3\audiototext.txt"
     transcribe_mp3(MP3_FILE, OUTPUT_FILE)
     print("Done! Transcription saved to:", OUTPUT_FILE)
 #/mnt/c/Users/tyler/OneDrive/Desktop/whispertest.py
