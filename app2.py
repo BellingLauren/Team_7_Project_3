@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from bs4 import BeautifulSoup
 import urllib.parse
 #from whispertest import get_latest_transcription
+from text_var import TRANSCRIPT_TEXT
 from chatbot_integration import (
     initialize_chatbot_state,
     update_suggestions,
@@ -501,7 +502,7 @@ with right_column:
     
     # Create a form for the chat input
     with st.form(key="chat_form"):
-        user_input = st.text_input("Ask me about your trip:", key="user_input")
+        user_input = TRANSCRIPT_TEXT
         submit_button = st.form_submit_button("Send")
         
         if submit_button and user_input:
@@ -523,5 +524,5 @@ with right_column:
                                    
             # Force a rerun to update the displayed chat
             st.rerun()
-from text_var import TRANSCRIPT_TEXT
+
 st.write(TRANSCRIPT_TEXT)
