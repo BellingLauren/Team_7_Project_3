@@ -122,6 +122,7 @@ The chatbot is rule-based and responds to specific keywords like:
 - Responses are tailored for user engagement and guidance.
 
 Fine tuning for the chatbot is located within the 'whisper_travel_fintune.py' file:
+The file would need to be configured further to automatically tune it.
 ---
 
 ## 📌 Future Enhancements
