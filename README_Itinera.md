@@ -61,6 +61,7 @@ This project is a web-based travel planning application that integrates real-tim
 ├── IATA_List.csv           # List of IATA airport codes (used by Streamlit app)
 ├── USA_Airports_IATA.csv   # Additional airport data (not directly used in app logic)
 ├── Project_3_Pipeline.ipynb# Development notebook (Jupyter)
+├──
 ```
 
 ---
@@ -120,6 +121,7 @@ The chatbot is rule-based and responds to specific keywords like:
 - `travel`, `flight`, `hotel`, `tour`, `api`, `name`, `date`, `airport`
 - Responses are tailored for user engagement and guidance.
 
+Fine tuning for the chatbot is located within the 'whisper_travel_fintune.py' file:
 ---
 
 ## 📌 Future Enhancements

@@ -8,7 +8,7 @@ def transcribe_mp3(mp3_path: str, output_path: str):
     Transcribe the MP3 file at `mp3_path` using a Whisper model
     and save the transcription to `output_path`.
     """
-    asr_pipeline = pipeline("automatic-speech-recognition", model="openai/whisper-small.en",return_timestamps=True)
+    asr_pipeline = pipeline("automatic-speech-recognition", model="your-username/whisper-fine-tuned-travel",return_timestamps=True)
     result = asr_pipeline(mp3_path)
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(result["text"] + "\n")
